@@ -1,30 +1,25 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
-using System.Collections;
 
 
 public class InputToBarScript : MonoBehaviour
 {
-    public Vector2 moveVal;
-    public float moveSpeedx;
-    public float moveSpeedy;
-    public float moveSpeedz;
+    public float moveVal;
 
     Rigidbody rb;
 
     // The gains are chosen experimentally
-    public Vector3 rpyKp = new Vector3();
-    public Vector3 rpyKi = new Vector3();
-    public Vector3 rpyKd = new Vector3();
+    public float turnKp;
+    public float turnKi;
+    public float turnKd;
 
-    public Vector3 rpyCur = new Vector3();
-    public Vector3 rpyTgt = new Vector3();
-    public Vector3 rpyTorCur = new Vector3();
+    public float turnCur;
+    public float turnTgt;
+    public float turnTorCur;
 
-    public Vector3 prevError = new Vector3();
-    public Vector3 P = new Vector3();
-    public Vector3 I = new Vector3();
-    public Vector3 D = new Vector3();
+    public float prevError;
+    public float P;
+    public float I;
+    public float D;
 
     private GameMasterScript gm;
 
@@ -33,36 +28,34 @@ public class InputToBarScript : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         gm = GameObject.Find("GameMaster").GetComponent<GameMasterScript>();
     }
-    void OnMove(InputValue value)
+    void Rotate(float value)
     {
-        moveVal = value.Get<Vector2>();
-        rpyTgt[1] = moveVal.x * 90.0f;
+        moveVal = value;
+        turnTgt = moveVal * 45.0f;
     }
-    void Update()
+    void FixedUpdate()
     {
-        rpyCur = transform.localEulerAngles;
-        for (int i = 0; i < 3; ++i)
+        turnCur = transform.localEulerAngles.y;
+        if (turnCur > 180.0f)
         {
-            if (rpyCur[i] > 180.0f)
-            {
-                rpyCur[i] -= 360.0f;
-            }
-            if (rpyCur[i] < -180.0f)
-            {
-                rpyCur[i] += 360.0f;
-            }
+            turnCur -= 360.0f;
         }
-        rpyTorCur = GetOutput(rpyTgt - rpyCur, Time.deltaTime);
-        rb.AddRelativeTorque(rpyTorCur);
+        if (turnCur < -180.0f)
+        {
+            turnCur += 360.0f;
+        }
+
+        turnTorCur = GetOutput(turnTgt - turnCur, Time.deltaTime);
+        rb.AddRelativeTorque(Vector3.up * turnTorCur);
     }
-    public Vector3 GetOutput(Vector3 currentError, float dt)
+    public float GetOutput(float currentError, float dt)
     {
         P = currentError;
         I += P * dt;
         D = (P - prevError) / dt;
         prevError = currentError;
 
-        return Vector3.Scale(P, rpyKp) + Vector3.Scale(I, rpyKi) + Vector3.Scale(D, rpyKd);
+        return P * turnKp + I * turnKi + D * turnKd;
     }
 }
 
