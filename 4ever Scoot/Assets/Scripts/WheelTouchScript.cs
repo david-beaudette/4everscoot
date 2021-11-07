@@ -7,7 +7,7 @@ public class WheelTouchScript : MonoBehaviour
     public int collisionCount = 0;
     private string wheelName;
     private int wheelNum;
-    private GameObject gm; 
+    private ScooterScript scooter;
 
     // Start is called before the first frame update
     void Start()
@@ -23,7 +23,7 @@ public class WheelTouchScript : MonoBehaviour
                 wheelNum = 1;
                 break;
         }
-        gm = GameObject.Find("GameMaster");
+        scooter = GameObject.Find("Scooter").GetComponent<ScooterScript>();
     }
 
     // Update is called once per frame
@@ -34,10 +34,14 @@ public class WheelTouchScript : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         ++collisionCount;
-        gm.SendMessage("WheelTouchedGround", wheelNum);
+        scooter.SendMessage("WheelTouchedGround", wheelNum);
     }
     private void OnCollisionExit(Collision collision)
     {
-        gm.SendMessage("WheelLeftGround", wheelNum);
+        --collisionCount;
+        if(collisionCount == 0)
+        {
+            scooter.SendMessage("WheelLeftGround", wheelNum);
+        }
     }
 }

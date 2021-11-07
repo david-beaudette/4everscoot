@@ -3,11 +3,6 @@ using UnityEngine;
 
 public class InputToBarScript : MonoBehaviour
 {
-    public float moveVal;
-
-    Rigidbody rb;
-
-    // The gains are chosen experimentally
     public float turnKp;
     public float turnKi;
     public float turnKd;
@@ -16,22 +11,28 @@ public class InputToBarScript : MonoBehaviour
     public float turnTgt;
     public float turnTorCur;
 
+    public float turnCmd;
     public float prevError;
     public float P;
     public float I;
     public float D;
 
-    private GameMasterScript gm;
+    private ScooterScript scooter;
+    Rigidbody rb;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        gm = GameObject.Find("GameMaster").GetComponent<GameMasterScript>();
+        scooter = GameObject.Find("Scooter").GetComponent<ScooterScript>();
     }
     void Rotate(float value)
     {
-        moveVal = value;
-        turnTgt = moveVal * 45.0f;
+        turnCmd = value;
+        turnTgt = turnCmd * 45.0f;
+    }
+    public Vector3 GetForwardVector()
+    {
+        return transform.forward;
     }
     void FixedUpdate()
     {
